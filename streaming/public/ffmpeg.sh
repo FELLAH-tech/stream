@@ -19,11 +19,26 @@
 #   -map 0 \
 #   -use_timeline 1 -use_template 1 -window_size 5 -adaptation_sets "id=0,streams=v id=1,streams=a" \
 #   -f dash sample.mpd
+# mkdir 360;
+# mkdir 480;
+# mkdir 720;
 
-ffmpeg -i sample.mp4 \
+ffmpeg -i test.mp4 \
   -map 0:v:0 -map 0:a\?:0 -map 0:v:0 -map 0:a\?:0 -map 0:v:0 -map 0:a\?:0 \
-  -b:v:0 500k  -c:v:0 libx264 -filter:v:0 "scale=360:-1" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \
-  -b:v:1 1500k -c:v:1 libx264 -filter:v:1 "scale=480:-1" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \
-  -b:v:2 5000k -c:v:2 libx264 -filter:v:2 "scale=720:-1" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2"\
-  -use_timeline 1 -use_template 1 -segment_time 10 -adaptation_sets "id=0,streams=v  id=1,streams=a" \
+  -b:v:0 250k  -filter:v:0 "scale=-2:240" -profile:v:0 baseline \
+  -b:v:1 750k  -filter:v:1 "scale=-2:480" -profile:v:1 main \
+  -b:v:2 1500k -filter:v:2 "scale=-2:720" -profile:v:2 high \
+  -use_timeline 1 -use_template 1 -segment_time 2 -adaptation_sets "id=0,streams=v  id=1,streams=a" \
   -f dash output.mpd
+
+# ffmpeg -i test.mp4 \
+#   -map 0:v:0 -map 0:a\?:0 -map 0:v:0 -map 0:a\?:0 -map 0:v:0 -map 0:a\?:0 \
+#   -b:v:1 1500k -c:v:1 libx264 -filter:v:1 "scale=480:-1" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" \
+#   -use_timeline 1 -use_template 1 -segment_time 10 -adaptation_sets "id=0,streams=v  id=1,streams=a" \
+#   -f dash 480/output.mpd
+
+# ffmpeg -i test.mp4 \
+#   -map 0:v:0 -map 0:a\?:0 -map 0:v:0 -map 0:a\?:0 -map 0:v:0 -map 0:a\?:0 \
+#   -b:v:2 5000k -c:v:2 libx264 -filter:v:2 "scale=720:-1" -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2"\
+#   -use_timeline 1 -use_template 1 -segment_time 10 -adaptation_sets "id=0,streams=v  id=1,streams=a" \
+#   -f dash 720/output.mpd
