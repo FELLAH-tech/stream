@@ -2,59 +2,50 @@ const express = require('express')
 const fs = require('fs')
 const path = require('path')
 const app = express()
+const multer = require("multer");
+const busboy = require('busboy');
+var sys = require('sys')
+var exec = require('child_process').exec;
 
-app.use(express.static(path.join(__dirname, 'public')))
+app.set('view engine', 'pug');
+
+app.use(express.static(path.join(__dirname, 'views')))
+const upload = multer({ dest: "views/uploads/" });
+
 
 app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname + '/index.html'))
+  res.render('index', { path: '', name: 'uploading... !' });
 })
 
-app.get('/video', function(req, res) {
-  const path = 'sample.mp4'
-  const stat = fs.statSync(path)
-  const fileSize = stat.size
-  const range = req.headers.range
+app.post('/upload', function(req, res) {
+        let filename = '';
+        const bb = busboy({ headers: req.headers });
+        bb.on('file', (name, file, info) => {
+        filename = info.filename;
+        var dir = './views/uploads/'+filename;
 
-  if (range) {
-    const parts = range.replace(/bytes=/, "").split("-")
-    const start = parseInt(parts[0], 10)
-    const end = parts[1]
-      ? parseInt(parts[1], 10)
-      : fileSize-1
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir);
+        }
 
-    if(start >= fileSize) {
-      res.status(416).send('Requested range not satisfiable\n'+start+' >= '+fileSize);
-      return
-    }
-    
-    const chunksize = (end-start)+1
-    const file = fs.createReadStream(path, {start, end})
-    const head = {
-      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-      'Accept-Ranges': 'bytes',
-      'Content-Length': chunksize,
-      'Content-Type': 'video/mp4',
-    }
-
-    res.writeHead(206, head)
-    file.pipe(res)
-  } else {
-    const head = {
-      'Content-Length': fileSize,
-      'Content-Type': 'video/mp4',
-    }
-    res.writeHead(200, head)
-    fs.createReadStream(path).pipe(res)
-  }
-})
-app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname + '/index.html'))
-})
-
-app.get('/sample.mpd', function(req, res) {
-  res.sendFile(path.join(__dirname + '/sample.mpd')) 
-  
-})
+        const saveTo = path.join(__dirname +'/views/uploads/'+filename, filename);
+          file.pipe(fs.createWriteStream(saveTo));
+        });
+        bb.on('close', () => {
+          var foo = filename;
+          exec('./views/ffmpeg.sh ' + foo,
+            function (error, stdout, stderr) {
+              if (error !== null) {
+                console.log(error);
+              } else {
+              console.log('stdout: ' + stdout);
+              console.log('stderr: ' + stderr);
+              res.render('index', { path: 'uploads/'+filename , name: 'uploaded !' });
+              }
+          });
+        });
+        req.pipe(bb);
+   })
 
 app.listen(3000, function () {
   console.log('Listening on port 3000!')

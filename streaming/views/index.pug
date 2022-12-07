@@ -1,0 +1,105 @@
+doctype html
+html
+  head
+    title Dash.js Rocks
+    meta(charset='utf-8')
+    link(href='https://cdn.jsdelivr.net/npm/froala-editor@latest/css/froala_editor.pkgd.min.css', rel='stylesheet', type='text/css')
+    script.code(src='http://localhost:3000/dash.js/contrib/akamai/controlbar/ControlBar.js')
+    script(src='http://localhost:3000/dash.js/dist/dash.all.debug.js')
+    // Bootstrap core CSS
+    link(href='http://localhost:3000/dash.js/samples/lib/bootstrap/bootstrap.min.css', rel='stylesheet')
+    link(rel='stylesheet', href='http://localhost:3000/dash.js/contrib/akamai/controlbar/controlbar.css')
+    link(href='http://localhost:3000/dash.js/samples/lib/main.css', rel='stylesheet')
+    style.
+      video {
+      width: 100%;
+      }
+      .dash-video-player {
+      width: 50%;
+      position: relative; /* This position relative is needed to position the menus */
+      margin: 0 auto;
+      line-height: 1;
+      background-color: brown;
+      }
+      body {
+      background-color: black;
+      }
+      * {
+      box-sizing: border-box;
+      }
+      .container {
+      max-width: 500px;
+      margin: 60px auto;
+      }
+      .container h1 {
+      text-align: center;
+      color: white;
+      }
+      form {
+      background-color: white;
+      padding: 30px;
+      }
+      form .input-group {
+      margin-bottom: 15px;
+      }
+      form label {
+      display: block;
+      margin-bottom: 10px;
+      }
+      form input {
+      padding: 12px 20px;
+      width: 100%;
+      border: 1px solid #ccc;
+      }
+      .button {
+      width: 100%;
+      border: none;
+      background: rgb(37, 83, 3);
+      font-size: 18px;
+      color: white;
+      border-radius: 3px;
+      padding: 20px;
+      text-align: center;
+      }
+  body
+    form(action='/upload', enctype='multipart/form-data', method='post')
+      input(type='file', name='someCoolFiles')
+      br
+      button Upload
+      h1 Upload state : #{name}
+    .all
+      script(src='https://cdn.dashjs.org/latest/dash.all.min.js')
+      script(src='http://localhost:3000/dash.js/contrib/akamai/controlbar/ControlBar.js')
+      .dash-video-player
+        #videoContainer.videoContainer
+          video(preload='auto', autoplay='')
+          #videoController.video-controller.unselectable
+            #playPauseBtn.btn-play-pause(title='Play/Pause')
+              span#iconPlayPause.icon-play
+            span#videoTime.time-display 00:00:00
+            #fullscreenBtn.btn-fullscreen.control-icon-layout(title='Fullscreen')
+              span.icon-fullscreen-enter
+            #bitrateListBtn.control-icon-layout(title='Bitrate List')
+              span.icon-bitrate
+            input#volumebar.volumebar(type='range', value='1', min='0', max='1', step='.01')
+            #muteBtn.btn-mute.control-icon-layout(title='Mute')
+              span#iconMute.icon-mute-off
+            #trackSwitchBtn.control-icon-layout(title='A/V Tracks')
+              span.icon-tracks
+            #captionBtn.btn-caption.control-icon-layout(title='Closed Caption')
+              span.icon-caption
+            span#videoDuration.duration-display 00:00:00
+            .seekContainer
+              #seekbar.seekbar.seekbar-complete
+                #seekbar-buffer.seekbar.seekbar-buffer
+                #seekbar-play.seekbar.seekbar-play
+      script.
+        (function(){
+        var path = '#{path}';
+        var url = 'http://localhost:3000/'+path+'/output.mpd';
+        var videoElement = document.querySelector('.videoContainer video');
+        var player = dashjs.MediaPlayer().create();
+        player.initialize(videoElement, url, true);
+        var controlbar = new ControlBar(player);
+        controlbar.initialize();
+        })();
